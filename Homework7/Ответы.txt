@@ -20,7 +20,7 @@ auto result = task.get_future();
 std::thread(std::move(task)).detach();
 X = result.get(); 
 
-3) promice - позволяет работать со значением, как будто оно уже известно, пример:
+3) promise - позволяет работать со значением, как будто оно уже известно, пример:
 
 atd::promise<int> p;
 auto result =  p.get_future;
