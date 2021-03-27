@@ -2,6 +2,7 @@
 #include <random>
 #include <vector>
 #include <thread>
+#include <functional>
 
 struct Point
 {
@@ -37,16 +38,17 @@ void thread_Circle_Checker(int left, int right, int R, std::vector<Point> Points
 
 void parallel_counter(std::vector<Point> Points, int& circle_points_quantity_2)
 {
-    std::thread thr1(thread_Circle_Checker, 0, 200, 1000, Points, std::ref(circle_points_quantity_2));
-    std::thread thr2(thread_Circle_Checker, 200, 400, 1000, Points, std::ref(circle_points_quantity_2));
-    std::thread thr3(thread_Circle_Checker, 400, 600, 1000, Points, std::ref(circle_points_quantity_2));
-    std::thread thr4(thread_Circle_Checker, 600, 800, 1000, Points, std::ref(circle_points_quantity_2));
-    std::thread thr5(thread_Circle_Checker, 800, 1000, 1000, Points, std::ref(circle_points_quantity_2));
-    thr1.join();
-    thr2.join();
-    thr3.join();
-    thr4.join();
-    thr5.join();
+    const std::size_t hardware_threads = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads(hardware_threads - 1);
+    double thread_x_size = 1000 / (double)hardware_threads;
+    double left = 0, right = thread_x_size;
+    for (size_t i = 0; i < threads.size(); i++)
+    {
+        threads[i] = std::thread(thread_Circle_Checker, left, right, 1000, Points, std::ref(circle_points_quantity_2));
+        left += thread_x_size;
+        right += thread_x_size;
+    }
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
 
