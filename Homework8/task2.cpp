@@ -12,7 +12,7 @@ void Rand_String_Generator(std::string& main_string)
 {
     std::random_device rd;
     std::mt19937 mersenne(rd());
-    for (size_t i = 0; i < std::thread::hardware_concurrency() * 4; i++)
+    for (size_t i = 0; i < 100; i++)
     {
         std::uniform_int_distribution<> un_distrib(0, 99);
         if (un_distrib(mersenne) < 25)
@@ -68,14 +68,20 @@ void Substring_Searcher(std::string main_string, std::string substring, std::vec
 void parallel_algorithm(std::string main_string, std::string substring, std::vector<size_t>& Iterators)
 {
     const std::size_t hardware_threads = std::thread::hardware_concurrency();
+    int thread_x_size = main_string.size() / hardware_threads;
+    int residue = main_string.size() % hardware_threads;
     std::vector<std::thread> threads(hardware_threads);
-    double thread_x_size = main_string.size() / hardware_threads;
     double left = 0, right = thread_x_size;
     for (size_t i = 0; i < threads.size(); i++)
     {
         threads[i] = std::thread(Substring_Searcher, main_string, substring, std::ref(Iterators), left, right);
         left += thread_x_size;
         right += thread_x_size;
+    }
+
+    if (residue != 0)
+    {
+        threads.push_back(std::thread(Substring_Searcher, main_string, substring, std::ref(Iterators), left, main_string.size()));
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
