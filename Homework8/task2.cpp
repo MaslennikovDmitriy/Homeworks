@@ -12,7 +12,7 @@ void Rand_String_Generator(std::string& main_string)
 {
     std::random_device rd;
     std::mt19937 mersenne(rd());
-    for (size_t i = 0; i < 15; i++)
+    for (size_t i = 0; i < std::thread::hardware_concurrency() * 4; i++)
     {
         std::uniform_int_distribution<> un_distrib(0, 99);
         if (un_distrib(mersenne) < 25)
@@ -43,10 +43,11 @@ int Checker(char a, char b)
     else return 0;
 }
 
-void Substring_Searcher(std::string main_string, std::string substring, std::vector<size_t>& Iterators)
+void Substring_Searcher(std::string main_string, std::string substring, std::vector<size_t>& Iterators, size_t left, size_t right)
 {
+    _mutex.lock();
     int count = 0;
-    for (size_t i = 0; i < main_string.size(); i++)
+    for (size_t i = left; i < right; i++)
     {
         for (size_t j = 0; j < substring.size(); j++)
         {
@@ -61,6 +62,22 @@ void Substring_Searcher(std::string main_string, std::string substring, std::vec
         }
         count = 0;
     }
+    _mutex.unlock();
+}
+
+void parallel_algorithm(std::string main_string, std::string substring, std::vector<size_t>& Iterators)
+{
+    const std::size_t hardware_threads = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads(hardware_threads);
+    double thread_x_size = main_string.size() / hardware_threads;
+    double left = 0, right = thread_x_size;
+    for (size_t i = 0; i < threads.size(); i++)
+    {
+        threads[i] = std::thread(Substring_Searcher, main_string, substring, std::ref(Iterators), left, right);
+        left += thread_x_size;
+        right += thread_x_size;
+    }
+    std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
 }
 
 int main()
@@ -72,7 +89,7 @@ int main()
     std::cout << "Insert the fragment you are looking for: ";
     std::cin >> substring;
     std::vector<size_t> Iterators;
-    Substring_Searcher(main_string, substring, Iterators);
+    parallel_algorithm(main_string, substring, Iterators);
     for (size_t i = 0; i < Iterators.size(); i++)
     {
         std::cout << "The beginning of " << i + 1 << " substring: " << Iterators[i] << std::endl;
