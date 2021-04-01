@@ -4,19 +4,19 @@
 #include <queue>
 
 template <typename T>
-class Threadsafe_Queue
+class Threadsafe_Priority_Queue
 {
 public:
 
-	Threadsafe_Queue() = default;
+	Threadsafe_Priority_Queue() = default;
 
-	Threadsafe_Queue(const Threadsafe_Queue& other)
+	Threadsafe_Priority_Queue(const Threadsafe_Priority_Queue& other)
 	{
 		std::lock_guard < std::mutex > lock(other.m_mutex);
 		m_queue = other.m_queue;
 	}
 
-	Threadsafe_Queue& operator=(const Threadsafe_Queue& other)
+	Threadsafe_Priority_Queue& operator=(const Threadsafe_Priority_Queue& other)
 	{
 		std::lock_guard < std::mutex > lock(other.m_mutex);
 		m_queue = other.m_queue;
@@ -99,7 +99,7 @@ private:
 
 int main()
 {
-	Threadsafe_Queue <int> queue;
+	Threadsafe_Priority_Queue <int> queue;
 
 	queue.push(42);
 
