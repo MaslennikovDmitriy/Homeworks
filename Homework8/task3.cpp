@@ -3,7 +3,7 @@
 #include <mutex>
 #include <queue>
 
-template < typename T >
+template <typename T>
 class Threadsafe_Queue
 {
 public:
@@ -40,7 +40,7 @@ public:
 		m_queue.pop();
 	}
 
-	std::shared_ptr < T > wait_and_pop()
+	std::shared_ptr <T> wait_and_pop()
 	{
 		std::unique_lock < std::mutex > lock(m_mutex);
 
@@ -89,7 +89,7 @@ public:
 
 private:
 
-	std::queue < T >		m_queue;
+	std::priority_queue <T>		m_queue;
 	std::condition_variable m_condition_variable;
 
 private:
@@ -97,9 +97,9 @@ private:
 	mutable std::mutex m_mutex;
 };
 
-int main(int argc, char** argv)
+int main()
 {
-	Threadsafe_Queue < int > queue;
+	Threadsafe_Queue <int> queue;
 
 	queue.push(42);
 
