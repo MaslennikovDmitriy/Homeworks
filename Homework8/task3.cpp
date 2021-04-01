@@ -18,7 +18,7 @@ public:
 
 	Threadsafe_Queue& operator=(const Threadsafe_Queue& other)
 	{
-		std::scoped_lock lock(m_mutex, other.m_mutex);
+		std::lock_guard < std::mutex > lock(other.m_mutex);
 		m_queue = other.m_queue;
 	}
 
@@ -36,7 +36,7 @@ public:
 		std::unique_lock < std::mutex > lock(m_mutex);
 
 		m_condition_variable.wait(lock, [this] {return !m_queue.empty(); });
-		value = m_queue.front();
+		value = m_queue.top();
 		m_queue.pop();
 	}
 
@@ -45,7 +45,7 @@ public:
 		std::unique_lock < std::mutex > lock(m_mutex);
 
 		m_condition_variable.wait(lock, [this] {return !m_queue.empty(); });
-		auto result = std::make_shared < T >(m_queue.front());
+		auto result = std::make_shared < T >(m_queue.top());
 		m_queue.pop();
 
 		return result;
@@ -60,7 +60,7 @@ public:
 			return false;
 		}
 
-		value = m_queue.front();
+		value = m_queue.top();
 		m_queue.pop();
 
 		return true;
@@ -75,7 +75,7 @@ public:
 			return std::shared_ptr < T >();
 		}
 
-		auto result = std::make_shared < T >(m_queue.front());
+		auto result = std::make_shared < T >(m_queue.top());
 		m_queue.pop();
 
 		return result;
