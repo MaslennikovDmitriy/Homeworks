@@ -67,7 +67,8 @@ void Substring_Searcher(std::string main_string, std::string substring, std::vec
 
 void parallel_algorithm(std::string main_string, std::string substring, std::vector<size_t>& Iterators)
 {
-    const std::size_t hardware_threads = std::thread::hardware_concurrency();
+    const std::size_t num_core = std::thread::hardware_concurrency();
+    int hardware_threads = num_core != 0 ? num_core : 12;
     int thread_x_size = main_string.size() / hardware_threads;
     int residue = main_string.size() % hardware_threads;
     std::vector<std::thread> threads(hardware_threads);

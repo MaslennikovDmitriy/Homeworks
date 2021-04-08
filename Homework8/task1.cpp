@@ -43,7 +43,8 @@ void thread_Circle_Checker(int left, int right, int R, std::vector<Point> Points
 
 void parallel_counter(std::vector<Point> Points, int& circle_points_quantity_2)
 {
-    const std::size_t hardware_threads = std::thread::hardware_concurrency();
+    const std::size_t num_core = std::thread::hardware_concurrency();
+    int hardware_threads = num_core != 0 ? num_core : 12;
     std::vector<std::thread> threads(hardware_threads);
     double thread_x_size = 1000 / (double)hardware_threads;
     double left = 0, right = thread_x_size;
